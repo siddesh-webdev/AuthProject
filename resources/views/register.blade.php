@@ -70,8 +70,8 @@
                             <div class="d-flex flex-row align-items-center mb-4">
                               <i class="fas fa-key fa-lg me-3 fa-fw"></i>
                               <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                                  <label class="form-label" for="rpassword">Repeat your password</label>
-                                <input type="password" id="rpassword" name="rpassword" class="form-control" required />
+                                  <label class="form-label" for="password_confirmation">Repeat your password</label>
+                                <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required />
                               </div>
                             </div>
           
@@ -120,7 +120,7 @@
     password: {
         required: true
     },
-    rpassword: {
+    password_confirmation: {
         required: true,
         equalTo: "#password"
     }
@@ -137,7 +137,7 @@ var msg = {
     password: {
         required: "Enter your password"
     },
-    rpassword: {
+    password_confirmation: {
         required: "Re-enter your password",
         equalTo: "Passwords do not match"
     }
@@ -150,7 +150,8 @@ $("#register-form").validate({
          error.insertAfter(element);
      },
      submitHandler:function(form){
-        // form.preventDefault();
+        event.preventDefault();
+        $("#alertDiv").fadeIn();
          $("#register-form").ajaxSubmit({
              url:"{{url('register/create')}}",
              type:"POST",
@@ -159,9 +160,13 @@ $("#register-form").validate({
              cache:false,
              success:function(res){
                 //  alert(res.message);
-                customAlert('success',res.message);
-                //  console.log(res);
-                $("#alertDiv").fadeOut(5000);
+                if(res.success){
+                  customAlert('success',res.message);
+                  
+                }else{
+                  customAlert('warning',res.message);
+                }
+                 $("#alertDiv").fadeOut(5000);
              },
              error:function(res){
                  console.log(res);
@@ -173,12 +178,17 @@ $("#register-form").validate({
 });
 
 function customAlert(type,msg){
-
+  $("#alertDiv").html('');
+    var htmldata ='';
+    if(type == 'success'){
+      htmldata += `<a href="{{url('login')}}">Login here</a>`; 
+    }
+    // console.log(typeof(type));
     var data = `<div class="alert alert-`+type+`  alert-dismissible fade show" role="alert">
-    <strong>`+msg+`</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
+      <strong>`+msg+` `+htmldata+`</strong>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+      </button>
     </div>`;
 
     $("#alertDiv").html(data);
