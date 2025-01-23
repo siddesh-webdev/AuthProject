@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Login Page</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <style>
     .container{
         display: flex;
@@ -17,10 +15,16 @@
         padding-top: 50px;
         padding-bottom: 50px;
     }
+    .error{
+        color:red;
+    }
 </style>
 </head>
 
 <body>
+  <div id="alertDiv">
+
+  </div> 
     <div class="container">
         <section class="vh-100" style="background-color: #eee;">
             <div class="container h-100">
@@ -33,31 +37,27 @@
           
                           <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Login</p>
           
-                          <form class="mx-1 mx-md-4">
+                            <form id="login-form" class="mx-1 mx-md-4">
           
-            
+                            @csrf
                             <div class="d-flex flex-row align-items-center mb-4">
                               <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
                               <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                                  <label class="form-label" for="form3Example3c">Your Email</label>
-                                <input type="email" id="form3Example3c" class="form-control" />
+                                  <label class="form-label" for="email">Email</label>
+                                <input type="email" id="email" name="email" class="form-control" required />
                               </div>
                             </div>
           
                             <div class="d-flex flex-row align-items-center mb-4">
                               <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
                               <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                                  <label class="form-label" for="form3Example4c">Password</label>
-                                <input type="password" id="form3Example4c" class="form-control" />
+                                  <label class="form-label" for="password">Password</label>
+                                <input type="password" id="password" name="password" class="form-control" />
                               </div>
                             </div>
-          
-                    
-          
-        
-          
+                 
                             <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                              <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Login</button>
+                              <button id="loginsubmit"  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Login</button>
                             </div>
           
                           </form>
@@ -77,5 +77,67 @@
             </div>
           </section>
     </div>
-</body>
+  </body>
 </html>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.20.0/dist/jquery.validate.min.js"></script>
+    <script src="https://malsup.github.io/jquery.form.js"></script>
+    <script>
+      // alert("hi");
+        var vrule ={
+          email:{ required :true,email :true },
+          password:{required:true}
+        }
+      
+        var msg = {
+          email:{required:"Enter the email",email:"Enter valid email"},
+          password:{required:"Enter the password"}
+        }
+      
+        $("#login-form").validate({
+            rules:vrule,
+            messages:msg,
+            errorPlacement: function(error, element) {
+              error.insertAfter(element);
+            },
+            submitHandler:function(form){
+              event.preventDefault();
+              $("#login-form").ajaxSubmit({
+                  url:"{{url('login/checkUser')}}",
+                  type:"POST",
+                  dataType:"json",
+                  clearForm:false,
+                  cache:false,
+                  success:function(res){
+                      if(res.success){
+                        // customAlert('success',res.message);
+                        window.location.href = res.redirectUrl;   
+                      }else{ 
+                        customAlert('warning',res.message);
+                      }
+                      $("#alertDiv").fadeOut(5000);
+                  },
+                  error:function(res){
+                      console.log(res);
+                  }
+              });
+              }
+        });
+
+
+      function customAlert(type,msg){
+          $("#alertDiv").html('');
+          var htmldata ='';
+          if(type == 'success'){
+            htmldata += `<a href="{{url('login')}}">Login here</a>`; 
+          }
+          // console.log(typeof(type));
+          var data = `<div class="alert alert-`+type+`  alert-dismissible fade show" role="alert">
+            <strong>`+msg+` `+htmldata+`</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+          </div>`;
+
+          $("#alertDiv").html(data);
+        }
+  </script>

@@ -24,7 +24,13 @@ Route::get('/register', function () {
 
 Route::get('/login', function () {
     return view('login');
-});
+})->name('login');
 
 // Route::get()
 Route::post('/register/create',[UserController::class,'createUser']);
+
+Route::post('/login/checkUser',[UserController::class,'checkUser']);
+
+Route::get('/dashboard/profile',[UserController::class,'profile'])->name('profile')->middleware('auth');
+
+Route::get('logout',[UserController::class,'logout'])->name('logout');
